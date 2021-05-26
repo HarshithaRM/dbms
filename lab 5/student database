@@ -1,0 +1,55 @@
+create database student;
+create table students (regno varchar(20), name varchar(20), major varchar(20), bdate date,primary key(regno));
+create table course(course_id int, cname varchar(20), dept varchar(20),primary key(course_id));
+
+create table enroll(regno varchar(20), course_id int, sem int, marks int,
+foreign key(regno) references students(regno) on  update cascade,
+foreign key(course_id) references course(course_id) on  update cascade);
+
+create table BOOK_ADOPTION (course_id int, sem int, book_ISBN int,
+foreign key(course_id) references course(course_id) on  update cascade,
+foreign key(book_ISBN) references TEXT(book_ISBN) on  update cascade
+);
+
+create table TEXT(book_ISBN int, book_title varchar(20), publisher varchar(20), author varchar(20),primary key(book_ISBN));
+
+
+insert into students values("CS01","RAM", 'DS' , '1986-03-12');
+insert into students values('IS02', 'SMITH', 'USP', '1987-12-23');
+insert into students values('EC03', 'AHMED', 'SNS', '1985-04-17');
+insert into students values('CS03', 'SNEHA', 'DBMS', '1987-01-01');
+insert into students values('TC05', 'AKHILA', 'EC', '1986-10-06');
+
+insert into course values(11, 'DS', 'CS');
+insert into course values(22, 'USP', 'IS');
+insert into course values(33, 'SNS', 'EC');
+insert into course values(44, 'DBMS', 'CS');
+insert into course values(55, 'EC', 'TC');
+
+insert into enroll values('CS01',11, 4 ,85);
+insert into enroll values('IS02',22, 6, 80);
+insert into enroll values('EC03',33,2, 80);
+insert into enroll values('CS03',44, 6, 75);
+insert into enroll values('TC05',55, 2, 8);
+
+
+insert into text values(1, 'DS and C', 'Princeton', 'Padma Reddy');
+insert into text values(2, 'Fundamentals of DS', 'Princeton', 'Godse');
+insert into text values(3,'Fundamentals of DBMS', 'Princeton', 'Navathe');
+insert into text values(4, 'SQL', 'Princeton', 'Foley');
+insert into text values(5, 'Electronic circuits', 'TMH', 'Elmasri');
+insert into text values(6, 'Adv unix prog', 'TMH' , 'Stevens');
+
+
+insert into BOOK_ADOPTION values(11, 4, 1);
+insert into BOOK_ADOPTION values(11 ,4, 2);
+insert into BOOK_ADOPTION values(44, 6, 3);
+insert into BOOK_ADOPTION values(44, 6, 4);
+insert into BOOK_ADOPTION values(55, 2 ,5);
+insert into BOOK_ADOPTION values(22, 6, 6);
+
+-- qn2
+select c.course_id,ba.book_ISBN,t.book_title from course c,book_adoption ba,text t where ba.book_isbn=t.book_isbn
+and ba.course_id in(select course_id from course where dept='CS') and ba.course_id=c.course_id order by t.book_title ;
+-- qn3
+select c.dept from course c,book_adoption ba,text t where c.course_id=ba.course_id and ba.book_ISBN=t.book_ISBN and t.author='Godse';

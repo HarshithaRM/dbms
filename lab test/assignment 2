@@ -1,0 +1,66 @@
+create database airlines;
+create table Flight(Flno int, fromp varchar(20), top varchar(20),
+Distance int, departs varchar(20),arrives varchar(20),primary key(flno));
+
+create table Aircraft(aid int,aname varchar(20),cruisingrange int,Flno int,primary key(aid),foreign key(Flno) references Flight(Flno) on delete cascade);
+
+create table Employee(eid int , ename varchar(20),salary int,primary key(eid));
+create table Certified(eid int ,aid int,foreign key(eid) references Employee(eid) on delete cascade,foreign key(aid) references Aircraft(aid) on delete cascade);
+
+insert into  Flight values(1, "Delhi","mumbai",6000,"4am","6am");
+insert into  Flight values(2, "Bangalore","mumbai",4000,"7am","8am");
+insert into  Flight values(3, "Chennai","Delhi",8000,"10am","3pm");
+insert into  Flight values(4, "Kolkata","hyderabad",7000,"9am","5pm");
+insert into  Flight values(5, "jaipur","kolkata",4000,"4am","6am");
+insert into  Flight values(6, "jaipur","bengaluru",9000,"4am","6am");
+
+
+insert into Aircraft values(101,"spicejet",7000,1);
+insert into Aircraft values(102,"boeing",20000,2);
+insert into Aircraft values(103,"air india",30000,3);
+insert into Aircraft values(104,"indigo",5000,4);
+insert into Aircraft values(105,"dream",7000,5);
+insert into Aircraft values(106,"dream1",10000,6);
+
+
+INSERT INTO Employee VALUES (701,'Asha',50000),
+							 (702,'Bhoomika',10000),
+                             (703,'Clara',15000),
+                             (704,'riya',90000),
+                             (705,'sham',40000);
+ update employee e set salary=25000 where  e.eid=703; 
+  update employee e set salary=55000 where  e.eid=702; 
+
+ 
+INSERT INTO Certified VALUES (701,101),
+							 (701,102),
+                             (701,105),
+                             (702,104),
+                             (703,103),
+                             (704,104),
+                             (702,101),
+                             (703,102),
+                             (704,105),
+                             (705,103);
+                             
+-- Find all the employees who are flying least two aircrafts By using Natural Join.
+SELECT ename FROM Employee e NATURAL JOIN Certified c GROUP BY c.eid HAVING COUNT(c.aid) >= 2;
+
+-- Find all the Employee Names,id who are certified and not certified
+SELECT  ename, eid FROM Employee WHERE eid IN (SELECT eid  FROM Certified);
+            
+SELECT ename, eid FROM Employee WHERE eid NOT IN (SELECT eid FROM Certified);
+
+-- Demonstrate how you delete a aircraft tuples whose cruising Range is 10000km
+DELETE FROM Aircraft  WHERE cruisingrange = 10000; SELECT * FROM Aircraft;
+
+-- Modify the Employee table by adding city attribute and check constraint to the employess salary attribute(>20000).
+ALTER TABLE Employee ADD cityn VARCHAR(30) NOT NULL,
+                      ADD CONSTRAINT check_salary1 CHECK(salary > 20000);SELECT *FROM Employee;
+
+-- Create a View which contains(eid,Totalsalary,AvgSalary) for each employee who are certified.		
+	CREATE VIEW Employee_details AS SELECT e.eid,SUM(salary) AS total_salary,AVG(salary) AS avg_salary FROM Employee e,
+	Certified c WHERE e.eid = c.eid GROUP BY e.eid; 
+    
+    select * from employee_details ;
+    commit;

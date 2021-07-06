@@ -1,0 +1,74 @@
+create database movie;
+create table ACTOR( Act_id int,  Act_Name varchar(20), Act_Gender varchar(5),primary key(Act_id));
+create table DIRECTOR(Dir_id int ,Dir_Name varchar(20), Dir_Phone int,primary key(Dir_id));
+
+create table MOVIES(Mov_id int, Mov_Title varchar(20), Mov_Year int , Mov_Lang varchar(20), Dir_id int,primary key(Mov_id),
+foreign key(Dir_id) references DIRECTOR (Dir_id) on delete cascade);
+
+create table MOVIE_CAST(Act_id int,Mov_id int, Role varchar(20),foreign key(Act_id) references ACTOR (Act_id) on delete cascade ,
+foreign key(Mov_id) references MOVIES (Mov_id) on delete cascade);
+
+create table RATING(Mov_id int, Rev_Stars int,foreign key(Mov_id) references MOVIES (Mov_id) on delete cascade);
+
+
+INSERT INTO ACTOR VALUES (301,"ANUSHKA","F"); 
+INSERT INTO ACTOR VALUES (302,"PRABHAS","M"); 
+INSERT INTO ACTOR VALUES (303,"PUNITH","M"); 
+INSERT INTO ACTOR VALUES (304,"JERMY","M"); 
+INSERT INTO ACTOR VALUES (305,"SAMANTHA","F");
+
+INSERT INTO DIRECTOR VALUES (60,"RAJAMOULI", 875161100); 
+INSERT INTO DIRECTOR VALUES (61,"HITCHCOCK", 776613891); 
+INSERT INTO DIRECTOR VALUES (62,"FARAN", 998677653); 
+INSERT INTO DIRECTOR VALUES (63,"STEVEN SPIELBERG", 898977653); 
+INSERT INTO DIRECTOR VALUES(64,"RAJ KUMAR RAO",987654322);
+
+INSERT INTO MOVIES VALUES (1001,"BAHUBALI-2", 2017, "TELUGU", 60); 
+INSERT INTO MOVIES VALUES (1002,"BAHUBALI-1", 2015, "TELUGU", 60); 
+INSERT INTO MOVIES VALUES (1003,"AKASH", 2008, "KANNADA", 64); 
+INSERT INTO MOVIES VALUES (1004,"WAR HORSE", 2011, "ENGLISH", 63);
+INSERT INTO MOVIES VALUES (1005,"VERTIGO", 1954, "ENGLISH", 61); 
+
+INSERT INTO MOVIES VALUES (1006,"REAR WINDOW",1958, "ENGLISH", 61); 
+ 
+
+
+INSERT INTO MOVIE_CAST VALUES (301, 1002, "HEROINE"); 
+INSERT INTO MOVIE_CAST VALUES (301, 1001, "HEROINE"); 
+INSERT INTO MOVIE_CAST VALUES (302, 1002, "HERO"); 
+INSERT INTO MOVIE_CAST VALUES (302, 1001, "HERO"); 
+INSERT INTO MOVIE_CAST VALUES (303, 1003, "HERO"); 
+INSERT INTO MOVIE_CAST VALUES (303, 1002, "GUEST"); 
+INSERT INTO MOVIE_CAST VALUES (304, 1004, "HERO"); 
+INSERT INTO MOVIE_CAST VALUES (305, 1005, "HEROINE"); 
+
+INSERT INTO MOVIE_CAST VALUES (305, 1006, "HEROINE"); 
+
+
+INSERT INTO RATING VALUES (1001, 4); 
+INSERT INTO RATING VALUES (1002, 2);
+INSERT INTO RATING VALUES (1003, 5); 
+INSERT INTO RATING VALUES (1004, 4);
+INSERT INTO RATING VALUES (1005, 4);
+INSERT INTO RATING VALUES (1006, 4);
+
+-- 1. List the titles of all movies directed by ‘Hitchcock’.
+select Mov_title from MOVIES M,DIRECTOR D WHERE M.Dir_id=D.Dir_id and D.Dir_name="HITCHCOCK";
+
+-- 2. Find the movie names where one or more actors acted in two or more movies.
+select Mov_title from MOVIES where Mov_id in (select Mov_id from MOVIE_CAST where act_id in 
+(select Act_id from MOVIE_CAST MC group by MC.Act_id having count(MC.Mov_id)>=2)) ; 
+
+-- select Act_id from MOVIE_CAST MC group by MC.Act_id having count(MC.Mov_id)>=2 ;
+
+-- 3. List all actors who acted in a movie before 2000 and also in a movie after 2015 (use JOIN operation).
+
+
+-- 4. Find the title of movies and number of stars for each movie that has at least one rating and find the highest
+-- number of stars that movie received. Sort the result by movie title.
+select Mov_title ,Rev_Stars  from MOVIES M,RATING R where M.Mov_id=R.Mov_id and Rev_stars>=1 order by Mov_title asc;
+select max(Rev_stars) as max_rating from Rating;
+
+-- 5 Update rating of all movies directed by ‘Steven Spielberg’ to 5.
+update RATING set Rev_stars=5 where Mov_id=(Select Mov_id from MOVIES where Dir_id=(select Dir_id from DIRECTOR where Dir_name="Steven Spielberg"));
+

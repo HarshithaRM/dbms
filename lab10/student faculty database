@@ -1,1 +1,198 @@
 
+DROP DATABASE IF EXISTS Student;
+CREATE DATABASE Studentf;
+USE Student;
+
+
+DROP TABLE IF EXISTS Student,
+					 Class,
+					 Enrolled,
+					 Faculty;
+
+
+CREATE TABLE Student (
+    snum INTEGER,
+    sname VARCHAR(40),
+    major VARCHAR(40),
+    lvl VARCHAR(40),
+    age INTEGER,
+    PRIMARY KEY (snum)
+);
+
+ CREATE TABLE Faculty (
+    fid INT,
+    fname VARCHAR(20),
+    deptid INT,
+    PRIMARY KEY (fid)
+);
+
+CREATE TABLE Class (
+    cname VARCHAR(20),
+    metts_at TIMESTAMP,
+    room VARCHAR(10),
+    fid INT,
+    PRIMARY KEY (cname),
+    FOREIGN KEY (fid)
+        REFERENCES Faculty (fid)
+);
+
+
+CREATE TABLE enrolled (
+    snum INT,
+    cname VARCHAR(20),
+    PRIMARY KEY (snum , cname),
+    FOREIGN KEY (snum)
+        REFERENCES Student (snum)
+);
+
+
+INSERT INTO Student VALUES (1, 'John', 'CS', 'Sr', 19),
+						   (2, 'Smith', 'CS', 'Jr', 20),
+						   (3 , 'Jacob', 'CV', 'Sr', 20),
+						   (4, 'Tom ', 'CS', 'Jr', 20),
+						   (5, 'Rahul', 'CS', 'Jr', 20),
+						   (6, 'Rita', 'CS', 'Sr', 21);
+
+INSERT INTO Faculty VALUES (11, 'Harish', 1000),
+						   (12, 'MV', 1000),
+						   (13 ,'Mira',1001),
+						   (14, 'Shiva', 1002),
+						   (15, 'Nupur', 1000);
+
+INSERT INTO Class VALUES ('class1', '12/11/15 10:15:16', 'R1', 14),
+						 ('class10', '12/11/15 10:15:16', 'R128', 14),
+						 ('class2', '12/11/15 10:15:20', 'R2', 12),
+						 ('class3', '12/11/15 10:15:25', 'R3', 11),
+						 ('class4', '12/11/15 20:15:20', 'R4', 14),
+						 ('class5', '12/11/15 20:15:20', 'R3', 15),
+						 ('class6', '12/11/15 13:20:20', 'R2', 14),
+						 ('class7', '12/11/15 10:10:10', 'R3', 14);
+select cname from Faculty f, Class c where f.fid = c.fid and (room = 'D55' or fname ='Harish');
+INSERT INTO Enrolled VALUES (1, 'class1'),
+							(2, 'class1'),
+							(3, 'class3'),
+							(4, 'class3'),
+							(5, 'class4'),
+							(1, 'class5'),
+							(2, 'class5'),
+							(3, 'class5'),
+							(4, 'class5'),
+							(5, 'class5');
+      
+      
+      SELECT s.sname from STUDENT s , ENROLLED e1, ENROLLED e2
+where e1.snum=e2.snum and  e1.snum=s.snum and e2.cname="class1" and e1.cname="class5";
+      
+      
+SELECT 
+    *
+FROM
+    Student;
+    
+SELECT 
+    *
+FROM
+    Faculty;
+    
+SELECT 
+    *
+FROM
+    Class;
+    
+SELECT 
+    *
+FROM
+    Enrolled;
+    
+
+SELECT 
+    sname
+FROM
+    Student s,
+    Class c,
+    Faculty f,
+    Enrolled e
+WHERE
+    lvl = 'Jr' AND s.snum = e.snum
+        AND e.cname = c.cname
+        AND c.fid = f.fid
+        AND fname = 'Harish';
+        
+
+SELECT 
+    c.cname
+FROM
+    Class c,
+    (SELECT 
+        cname
+    FROM
+        Enrolled
+    GROUP BY cname
+    HAVING COUNT(snum) >= 5) AS A
+WHERE
+    c.cname = A.cname OR room = 'R128';  
+
+
+SELECT 
+    sname
+FROM
+    Student s,
+    (SELECT 
+        snum
+    FROM
+        Class c, Enrolled e
+    WHERE
+        c.cname = e.cname
+    GROUP BY snum
+    HAVING COUNT(DISTINCT metts_at) = 1) AS A
+WHERE
+    A.snum = s.snum;
+    
+
+SELECT 
+    fname
+FROM
+    Faculty f,
+    Class c
+WHERE
+    f.fid = c.fid
+GROUP BY c.fid
+HAVING COUNT(room) = (SELECT 
+        COUNT(DISTINCT room)
+    FROM
+        Class);
+        
+
+SELECT 
+    fname, COUNT(e.cname) AS number_of_courses
+FROM
+    Faculty f,
+    Class c,
+    Enrolled e
+WHERE
+    f.fid = c.fid AND c.cname = e.cname
+GROUP BY c.fid
+HAVING COUNT(e.cname) < 5; 
+
+
+SELECT 
+    sname
+FROM
+    Student
+WHERE
+    snum NOT IN (SELECT DISTINCT
+            (snum)
+        FROM
+            enrolled);
+            
+            
+SELECT 
+    age, lvl
+FROM
+    (SELECT 
+        age, lvl, COUNT(snum) AS count_of_students
+    FROM
+        Student
+    GROUP BY age , lvl) AS A
+GROUP BY age
+HAVING MAX(count_of_students);
